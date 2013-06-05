@@ -1442,7 +1442,7 @@ static unsigned char boothdr[512];
 int do_booti (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	unsigned addr;
-	char *ptn = "boot";
+	char *ptn = "recovery";
 	int mmcc = -1;
 	boot_img_hdr *hdr = (void*) boothdr;
 	static char device_serial[38];
