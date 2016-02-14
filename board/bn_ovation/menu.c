@@ -50,14 +50,14 @@
 #define VOLDOWN_KEY (1 << 3)
 
 #define NUM_OPTS		8  //number of boot options
-char *opt_list[NUM_OPTS] = { 
-		" Boot from Internal Storage ",
-		" Boot from SDCARD           ",
-		" Boot SD Stock              ",
+char *opt_list[NUM_OPTS] = {
+		" Normal Boot (eMMC)         ",
+		" Boot TWRP (3.0.0-0)        ",
+		" Boot TWRP (2.8.7.5)        ",
 		" Boot CWM Recovery          ",
 		"                            ",
-		" Default Boot:              ", 
-		"       Device: ", 
+		" Default Boot:              ",
+		"       Device: ",
 		"        Image: ", };
 
 // Shared sprintf buffer for fatsave/load
