@@ -2071,7 +2071,7 @@ clean:
 	rm -f include/bmp_logo.h
 
 clobber:	clean
-	find . -type f \( -name .depend \
+	find . -type f -not -path './.git/*' \( -name .depend \
 		-o -name '*.srec' -o -name '*.bin' -o -name u-boot.img \) \
 		-print0 \
 		| xargs -0 rm -f
