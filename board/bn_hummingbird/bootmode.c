@@ -379,13 +379,13 @@ static void display_feedback(enum boot_action image)
                 lcd_puts("   Loading system from EMMC...");
                 break;
         case BOOT_SD_RECOVERY:
-                lcd_puts("   Loading Recovery from SD...");
+                lcd_puts("   Loading legacy CWM from SD...");
                 break;
         case BOOT_HYBRID:
-                lcd_puts("   Loading CyanogenMod ROM from SD...");
+                lcd_puts("   Loading TWRP 3.0.1-0 from SD...");
                 break;
 	case BOOT_SD_ALTERNATE:
-		lcd_puts("   Loading Stock from SD...");
+		lcd_puts("   Loading TWRP 2.8.7.5 from SD...");
 		break;
 
        // case BOOT_EMMC_ALTBOOT:
