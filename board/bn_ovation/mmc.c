@@ -34,6 +34,7 @@
 #include <omap4_dsi.h>
 #include <bn_boot.h>
 
+#include "menu.h"
 #include "console.h"
 
 static const struct efi_partition_info partitions[] = {
@@ -133,13 +134,15 @@ static struct omap_dsi_panel panel = {
 		.row_inc	= 112,
 	},
 };
-extern uint16_t const _binary_boot_rle_start[];
+
+extern uint16_t const _binary_cyanoboot_rle_start[];
 extern uint16_t const _binary_lowbatt_charge_rle_start[];
 
 uint32_t FB = 0xb2200000;
 
 int panel_has_enabled = 1;
 int boot_displayed =0;
+
 void disable_panel_backlight(void){
 
      if(panel_has_enabled)
@@ -177,7 +180,7 @@ void show_image(ppz_images image_name)
 	panel_enable(0);
 	backlight_enable(0);
 	memset(FB, 0, panel.xres * panel.yres * 2);
-	display_rle(_binary_boot_rle_start, (uint16_t *) FB, panel.xres, panel.yres);
+	display_rle(_binary_cyanoboot_rle_start, (uint16_t *) FB, panel.xres, panel.yres);
 
 	bootimg_info.width = panel.xres;
 	bootimg_info.height = panel.yres;

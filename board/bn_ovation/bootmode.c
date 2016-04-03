@@ -9,9 +9,6 @@
 #include "menu.h"
 
 #define BN_BOOTLIMIT     8
-#define RESET_REASON ( ( * ( (volatile unsigned int *) ( 0x4A307B04 ) ) ) & 0x3 )
-#define WARM_RESET ( 1 << 1 )
-#define COLD_RESET ( 1 )
 
 #define HOME_BUTTON	32
 #define POWER_BUTTON	29
@@ -81,7 +78,6 @@ static int check_fat_file_exists(int slot , int partition, char * file) {
 		ret = 1;
 	}
 	return ret;
-
 }
 
 extern int32_t FB;
@@ -123,16 +119,15 @@ static void set_boot_cmd( int boot_type)
 
 static void clear_bcb(void)
 {
-        static struct bootloader_message bcb = {
-                .command = "",
-                .status = "",
-                .recovery = "",
-        };
+	static struct bootloader_message bcb = {
+		.command = "",
+		.status = "",
+		.recovery = "",
+	};
 
-        write_bcb(&bcb);
-        return;
+	write_bcb(&bcb);
+	return;
 }
-
 
 static void set_recovery_update_bcb(void)
 {
@@ -156,7 +151,7 @@ int check_emmc_boot_mode(void)
 	//we need to run this again to avoid data abort if reading ppz from mmc 1:5
 #if 0
 	if ( check_fat_file_exists( 0 , 1, "ovation_update.zip") ){
-		if ( RESET_REASON != WARM_RESET ){
+		if ( RESET_REASON != G_WARM_SW ){
 			set_recovery_update_bcb();
 			ret_val = EMMC_RECOVERY;
 		}
@@ -214,6 +209,12 @@ int check_emmc_boot_mode(void)
 #endif
 
 	return ret_val;
+}
+
+static inline int running_from_sd() {
+
+	char boot_dev_name[8];
+	return get_boot_device(boot_dev_name) == BOOT_DEVICE_SD;
 }
 
 // Shared sprintf buffer for fatsave
@@ -293,33 +294,37 @@ static inline enum boot_action get_boot_action(void)
                 lcd_console_setpos(53, 15);
                 lcd_console_setcolor(CONSOLE_COLOR_ORANGE, CONSOLE_COLOR_BLACK);
                 lcd_puts("/bootdata/BCB missing.  Running recovery.");
-                return BOOT_SD_RECOVERY;
+                if (running_from_sd()) {
+                        return BOOT_SD_RECOVERY;
+                }
         }
 
         // give them time to press the button(s)
         udelay(1500000);
         if ((gpio_read(HOME_BUTTON) == 0) &&
                 (gpio_read(POWER_BUTTON) == 1)) {  // BOTH KEYS STILL HELD FROM UB1
+                if (running_from_sd()) {
                         return BOOT_SD_RECOVERY;
                 }
+        }
 
-                if ((gpio_read(HOME_BUTTON) == 0) &&
-                         (gpio_read(POWER_BUTTON) == 0))    // just HOME button is pressed
-                {
-                        lcd_console_setpos(39, 18);
-                        lcd_puts("                      ");
-                        return do_menu();
-                }
+        if ((gpio_read(HOME_BUTTON) == 0) &&
+                (gpio_read(POWER_BUTTON) == 0))    // just HOME button is pressed
+        {
+                lcd_console_setpos(39, 18);
+                lcd_puts("                      ");
+                return do_menu();
+        }
         else    // default boot
-                {
+        {
                 char device_flag, altboot_flag;
-                if ((device_flag = read_u_boot_device()) != '1') {
+                if ((running_from_sd()) && ((device_flag = read_u_boot_device()) != '1')) {
                         if (check_device_image(DEV_SD, "ramdisk"))
                                 return BOOT_HYBRID;
-			else if (check_device_image(DEV_SD, "ramdisk.stock"))
-				return BOOT_SD_ALTERNATE;
-                        else
-                                return BOOT_SD_RECOVERY;
+                else if (check_device_image(DEV_SD, "ramdisk.stock"))
+                        return BOOT_SD_ALTERNATE;
+                else
+                        return BOOT_SD_RECOVERY;
                 } else {        // running from emmc or overridden
                                // if (altboot_flag = read_u_boot_altboot() == '1') {
                                //         lcd_console_setpos(53, 11);
@@ -327,7 +332,7 @@ static inline enum boot_action get_boot_action(void)
                                //         lcd_puts("Normal SD boot overridden.  Alt boot from EMMC...");
                                //         return BOOT_EMMC_ALTBOOT; }
                                // else {
-                                        if (device_flag == '1') {
+                                        if ((device_flag == '1') && (running_from_sd())) {
                                         lcd_console_setpos(53, 15);
                                         lcd_console_setcolor(CONSOLE_COLOR_ORANGE, CONSOLE_COLOR_BLACK);
                                         lcd_puts("SD boot overridden.  Booting from EMMC..."); }
@@ -355,7 +360,7 @@ static void display_feedback(enum boot_action image)
                 lcd_puts("   Loading Recovery from SD...");
                 break;
         case BOOT_HYBRID:
-                lcd_puts(" Loading CyanogenMod from SD...");
+                lcd_puts("   Loading CyanogenMod ROM from SD...");
                 break;
 	case BOOT_SD_ALTERNATE:
 		lcd_puts("   Loading Stock from SD...");
@@ -376,7 +381,6 @@ static void display_feedback(enum boot_action image)
         //lcd_display_image(image_start, image_end);
 }
 
-
 int set_boot_mode(void)
 {
 	int ret = 0;
@@ -384,13 +388,13 @@ int set_boot_mode(void)
 	char boot_dev_name[8];
 	char buffer[512];
 
-	unsigned int boot_device = get_boot_device(boot_dev_name);
+	//unsigned int boot_device = get_boot_device(boot_dev_name);
 
-        lcd_console_setpos(49, 28);
+	lcd_console_setpos(49, 28);
 	lcd_console_setcolor(CONSOLE_COLOR_GRAY, CONSOLE_COLOR_BLACK);
-        lcd_puts("Hold \"^\" for boot menu");
+	lcd_puts("Hold \"^\" for boot menu");
 
-        int action = get_boot_action();
+	int action = get_boot_action();
 
         while (1) {
                 //if(charging)
@@ -419,7 +423,7 @@ int set_boot_mode(void)
                         //sprintf(buffer, "setenv bootargs ${bootargs} boot.fb=%x androidboot.serialno=${serialnum}", FB);
                         sprintf(buffer, "setenv bootargs ${bootargs} boot.fb=%x", FB);
                         run_command(buffer, 0);
-			setenv ("bootcmd", "mmcinit 1; booti mmc1");
+                        setenv("bootcmd", "mmcinit 1; booti mmc1");
                         display_feedback(BOOT_EMMC_NORMAL);
                         return 0;
 
@@ -496,7 +500,6 @@ int set_boot_mode(void)
         }
 
         return ret;
-
 }
 
 #ifdef CONFIG_BOOTCOUNT_LIMIT
@@ -519,6 +522,7 @@ unsigned long bootcount_load(void)
 
 	setenv("bootlimit", stringify(BN_BOOTLIMIT));
 	setenv("altbootcmd", "booti mmc1 recovery");
+
 	if ( get_boot_device(boot_dev_name) != BOOT_DEVICE_SD ) {
 
 		sprintf(buf, "mmcinit 1; fatload mmc 1:5 0x%08x BootCnt 4", &bootcount);

@@ -16,7 +16,7 @@ char lcd_is_enabled;
 int lcd_color_fg;
 int lcd_color_bg;
 
-static uint   pixel_line_length = 1280;
+//static uint pixel_line_length = VL_COL;
 
 //static void lcd_drawchars (ushort x, ushort y, uchar *str, int count);
 //static inline void lcd_puts_xy (ushort x, ushort y, uchar *s);
@@ -72,9 +72,9 @@ static inline void console_newline (void)
 
 static inline void lcd_console_setpixel(ushort x, ushort y, ushort c)
 {
-	ushort ry = 1279 - x;
+	ushort ry = VL_COL - x - 1;
 	ushort rx = y;
-	ushort *dest = ((uint16_t *)ONSCREEN_BUFFER) + rx + (ry*1920);
+	ushort *dest = ((uint16_t *)ONSCREEN_BUFFER) + rx + (ry*VL_ROW);
 	*dest = c;
 }
 
@@ -160,9 +160,6 @@ void lcd_putc (const char c)
 				     console_row * VIDEO_FONT_HEIGHT*2,
 				     c);
 			console_col++;
-			//if (++console_col >= c_max_cols) {
-			//	console_newline();
-			//}
 			return;
 	}
 	/* NOTREACHED */

@@ -133,9 +133,9 @@ int write_u_boot_file(const char* file, char value) {
 
 void print_u_boot_dev(void) {
 	if (read_u_boot_file("u-boot.device") == '1') {
-		lcd_puts("Stock         ");
+		lcd_puts("Stock ROM     ");
 	} else {
-		lcd_puts("CM10/CM10.1   ");
+		lcd_puts("CM/custom ROM ");
 	}
 }
 

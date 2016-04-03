@@ -23,9 +23,10 @@
 #include <fastboot.h>
 #include <asm/arch/sys_info.h>
 #include <omap4_dsi.h>
-
 #include <bn_boot.h>
+
 #include "menu.h"
+#include "console.h"
 
 static const struct efi_partition_info partitions[] = {
 	/* name       start_kb    size_kb */
@@ -195,6 +196,7 @@ extern uint16_t const _binary_cyanoboot_rle_start[];
 extern uint16_t const _binary_lowbatt_charge_rle_start[];
 
 uint32_t FB = 0xb2600000;
+
 int panel_has_enabled = 0;
 int is_lg = 1;
 static int bootmode = -1;
@@ -252,9 +254,9 @@ int board_late_init(void)
 
 	// Superhack (must read sdcard first to init the part table
 	run_command("mmcinit 0; fatload mmc 0:1 0x80000000 stuff 4", 0);
-	
+
 	bootmode = set_boot_mode();
-	
+
 	return bootmode;
 }
 

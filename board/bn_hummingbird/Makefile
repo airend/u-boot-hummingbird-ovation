@@ -23,7 +23,7 @@ include $(TOPDIR)/config.mk
 
 LIB	= lib$(BOARD).a
 
-OBJS	:= bn_hummingbird.o mmc.o bootmode.o lowbatt_charge.o console.o menu.o cyanoboot.o
+OBJS	:= bn_hummingbird.o mmc.o bootmode.o cyanoboot.o lowbatt_charge.o console.o menu.o
 
 CPPFLAGS += BN_HUMMINGBIRD
 
