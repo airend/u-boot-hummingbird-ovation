@@ -54,7 +54,7 @@ char *opt_list[NUM_OPTS] = {
 		" Normal Boot (eMMC)         ",
 		" Boot TWRP (3.0.0-0)        ",
 		" Boot TWRP (2.8.7.5)        ",
-		" Boot CWM Recovery          ",
+		" Boot CWM  (legacy)         ",
 		"                            ",
 		" Default Boot:              ",
 		"       Device: ",
@@ -232,7 +232,7 @@ int do_menu() {
 	lcd_puts1("Menu by j4mm3r, fattire, tonsofquestions, mik_os, Rebellos, HD, bokbokan, green.\n"
 		 "    ** EXPERIMENTAL ** (" __DATE__ " " __TIME__ ")");
 
-	cursor = BOOT_SD_RECOVERY;
+	cursor = BOOT_HYBRID;
 
 	// highlight first option
 	highlight_boot_line(cursor, HIGHLIGHT_CYAN);
