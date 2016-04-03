@@ -158,6 +158,8 @@ SUBDIRS	= tools \
 #########################################################################
 #########################################################################
 
+default:	uImage
+
 ALL = u-boot.srec u-boot.bin System.map
 
 all:		$(ALL)
@@ -186,6 +188,12 @@ u-boot:		depend version $(SUBDIRS) $(OBJS) $(LIBS) $(LDSCRIPT)
 		$(LD) $(LDFLAGS) $$UNDEF_SYM $(OBJS) \
 			--start-group $(LIBS) --end-group $(PLATFORM_LIBS) \
 			-Map u-boot.map -o u-boot
+
+uImage:	u-boot.bin
+		./tools/mkimage -A $(ARCH) -T kernel -C none \
+		-a $(TEXT_BASE) -e $(TEXT_BASE) \
+		-n "SD card loader ($(subst bn_,,$(BOARD)))" \
+		-d $< $@
 
 $(LIBS):
 		$(MAKE) -C `dirname $@`
