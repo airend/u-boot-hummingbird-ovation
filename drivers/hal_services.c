@@ -72,6 +72,7 @@ u32 SEC_ENTRY_Std_Ppa_Call (u32 appl_id, u32 inNbArg, ...)
 
 u32 PL310aux(u32 appl_id, u32 value)
 {
+	__asm__ __volatile__(".arch_extension sec");
 	__asm__ __volatile__("stmfd   sp!, {r2-r12, lr}");
 	__asm__ __volatile__("mov    r12, r0");
 	__asm__ __volatile__("ldr    r0, [r1]");
