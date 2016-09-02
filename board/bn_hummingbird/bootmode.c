@@ -94,24 +94,47 @@ static int check_fat_file_exists(int slot , int partition, char * file) {
 extern int32_t FB;
 static void set_boot_cmd( int boot_type)
 {
-	char buffer[256];
-	char *die_id = getenv("dieid#");
+	char buf[256] = { 0 };
+	char *cmdline;
+	int len;
 
-	sprintf(buffer, "setenv bootargs ${bootargs} androidboot.hardware=hummingbird androidboot.serialno=%s boot.fb=%x", die_id, FB);
+#if defined(CONFIG_OMAP4_ANDROID_CMD_LINE)
+	cmdline = getenv("android.bootargs.extra");
+#else
+	cmdline = getenv("bootargs");
+#endif
+
+	/* existing cmdline? */
+	if (cmdline)
+		strncpy(buf, cmdline, sizeof(buf) - 1);
+
+#if 0
+	/* does it fit? */
+	len = strlen(buf) + strlen(append) + 18;
+	if (sizeof(buf) < len)
+		return;
+#endif
+
+	strcat(buf, " androidboot.hardware=hummingbird");
+	sprintf(buf+strlen(buf), " boot.fb=%x", FB);
+
 	if ( SD_BOOTIMG == boot_type ) {
-		run_command("setenv bootargs ${sdbootargs}", 0);
 		setenv ("bootcmd", "mmcinit 0; fatload mmc 0:1 0x81000000 flashing_boot.img; booti 0x81000000");
 		setenv ("altbootcmd", "run bootcmd"); // for sd boot altbootcmd is the same as bootcmd
+		strcat(buf, " ");
+		strcat(buf, getenv("sdbootargs"));
 	} else if ( SD_UIMAGE == boot_type ){
-		run_command("setenv bootargs ${sdbootargs}", 0);
 		setenv ("bootcmd", "mmcinit 0; fatload mmc 0 0x80000000 uImage; bootm 0x80000000");
+		strcat(buf, " ");
+		strcat(buf, getenv("sdbootargs"));
 	} else if ( EMMC_ANDROID == boot_type ) {
-		run_command("setenv bootargs ${bootargs} display.vendor=${display_vendor}", 0);
-		run_command(buffer, 0);
 		setenv ("bootcmd", "mmcinit 1; booti mmc1");
+		strcat(buf, " display.vendor=");
+		strcat(buf, getenv("display_vendor"));
 	} else if ( EMMC_RECOVERY == boot_type ) {
-		run_command("setenv bootargs ${bootargs} display.vendor=${display_vendor}", 0);
 		setenv("bootcmd", "mmcinit 1; booti mmc1 recovery");
+		strcat(buf, " display.vendor=");
+		strcat(buf, getenv("display_vendor"));
 	}
 #ifdef CONFIG_USBBOOT
 	else if (USB_BOOTIMG == boot_type) { // device boot from USB, use a simple args
@@ -119,6 +142,12 @@ static void set_boot_cmd( int boot_type)
 		setenv ("bootcmd", "booti 0x81000000");
 		setenv ("altbootcmd", "run bootcmd");
 	}
+#endif
+
+#if defined(CONFIG_OMAP4_ANDROID_CMD_LINE)
+	setenv("android.bootargs.extra", buf);
+#else
+	setenv("bootargs", buf);
 #endif
 }
 
