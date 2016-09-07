@@ -95,7 +95,7 @@ extern int32_t FB;
 static void set_boot_cmd( int boot_type)
 {
 	char buffer[256];
-	sprintf(buffer, "setenv bootargs ${bootargs} display.vendor=${display_vendor} boot.fb=%x", FB);
+	sprintf(buffer, "setenv bootargs ${bootargs} androidboot.hardware=hummingbird display.vendor=${display_vendor} boot.fb=%x", FB);
 
 	run_command(buffer, 0);
 	if ( EMMC_RECOVERY == boot_type ) {
@@ -429,7 +429,7 @@ int set_boot_mode(void)
                 switch(action) {
                 case BOOT_SD_RECOVERY:
                         //setenv ("bootcmd", "setenv setbootargs setenv bootargs ${sdbootargs}; run setbootargs; mmcinit 0; fatload mmc 0:1 0x81000000 recovery.img; booti 0x81000000");
-                        sprintf(buffer, "setenv bootargs ${bootargs} display.vendor=${display_vendor} boot.fb=%x androidboot.serialno=${serialnum}", FB);
+                        sprintf(buffer, "setenv bootargs ${bootargs} androidboot.hardware=hummingbird display.vendor=${display_vendor} boot.fb=%x androidboot.serialno=${serialnum}", FB);
                         run_command(buffer, 0);
                         setenv ("bootcmd", "mmcinit 0; fatload mmc 0:1 0x81000000 kernel ; fatload mmc 0:1 82000000 ramdisk.cwm; bootm 0x81000000 0x82000000");
                         setenv ("altbootcmd", "run bootcmd"); // for sd boot altbootcmd is the same as bootcmd
@@ -437,7 +437,7 @@ int set_boot_mode(void)
                         return 0;
 
                 case BOOT_HYBRID:
-                        sprintf(buffer, "setenv bootargs ${bootargs} display.vendor=${display_vendor} boot.fb=%x androidboot.serialno=${serialnum}", FB);
+                        sprintf(buffer, "setenv bootargs ${bootargs} androidboot.hardware=hummingbird display.vendor=${display_vendor} boot.fb=%x androidboot.serialno=${serialnum}", FB);
                         run_command(buffer, 0);
                         setenv ("bootcmd", "mmcinit 0; fatload mmc 0:1 0x81000000 kernel ; fatload mmc 0:1 82000000 ramdisk; bootm 0x81000000 0x82000000");
                         setenv ("altbootcmd", "run bootcmd"); // for sd boot altbootcmd is the same as bootcmd
@@ -445,7 +445,7 @@ int set_boot_mode(void)
                         return 0;
                 //actually, boot from boot+512K -- thanks bauwks!
                 case BOOT_EMMC_NORMAL:
-                        //sprintf(buffer, "setenv bootargs ${bootargs} androidboot.serialno=${serialnum} display.vendor=${display_vendor} boot.fb=%x", FB);
+                        //sprintf(buffer, "setenv bootargs ${bootargs} androidboot.hardware=hummingbird androidboot.serialno=${serialnum} display.vendor=${display_vendor} boot.fb=%x", FB);
                         sprintf(buffer, "setenv bootargs ${bootargs} display.vendor=${display_vendor} boot.fb=%x", FB);
                         run_command(buffer, 0);
                         setenv("bootcmd", "mmcinit 1; booti mmc1");
