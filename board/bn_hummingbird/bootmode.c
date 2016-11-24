@@ -41,6 +41,8 @@ static const struct bootloader_message master_clear_bcb = {
 	.recovery = "recovery\n--wipe_data_ui\n",
 };
 
+extern inline int load_serial_num(void);
+
 inline int load_serial_num(void)
 {
 	memset((void*)0x81000000, 0, 32);
@@ -52,6 +54,8 @@ inline int load_serial_num(void)
 
 	return -1;
 }
+
+extern inline int load_display_vendor(void);
 
 inline int load_display_vendor(void)
 {
